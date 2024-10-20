@@ -29,4 +29,8 @@ func main() {
 
 	xMat := mat.NewDense(1, 2, []float64{1, 0.5})
 	network.Forward(xMat)
+
+	xSoftmax := mat.NewDense(1, 3, []float64{0.3, 2.9, 4.0})
+	ySoftmax := af.Softmax(xSoftmax)
+	display.Print(ySoftmax)
 }

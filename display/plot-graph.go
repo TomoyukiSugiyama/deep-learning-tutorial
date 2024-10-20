@@ -1,8 +1,6 @@
 package display
 
 import (
-	"math/rand/v2"
-
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/plotutil"
@@ -15,13 +13,20 @@ type Display interface {
 }
 
 type display struct {
-	p *plot.Plot
+	p   *plot.Plot
+	xys plotter.XYs
 }
 
 type Settings struct {
-	Title string
-	X     string
-	Y     string
+	Title   string
+	X       string
+	Y       string
+	Dataset Dataset
+}
+
+type Dataset struct {
+	X []float64
+	Y []float64
 }
 
 func New(s Settings) display {
@@ -29,8 +34,11 @@ func New(s Settings) display {
 	p.Title.Text = s.Title
 	p.X.Label.Text = s.X
 	p.Y.Label.Text = s.Y
+	xys := xysFrom(s.Dataset)
+
 	d := display{
-		p: p,
+		p:   p,
+		xys: xys,
 	}
 
 	return d
@@ -38,9 +46,7 @@ func New(s Settings) display {
 
 func (d display) Show() {
 	err := plotutil.AddLinePoints(d.p,
-		"First", randomPoints(15),
-		"Second", randomPoints(15),
-		"Third", randomPoints(15))
+		"data", d.xys)
 	if err != nil {
 		panic(err)
 	}
@@ -49,15 +55,13 @@ func (d display) Show() {
 		panic(err)
 	}
 }
-func randomPoints(n int) plotter.XYs {
-	pts := make(plotter.XYs, n)
+
+func xysFrom(dataset Dataset) plotter.XYs {
+	pts := make(plotter.XYs, len(dataset.X))
 	for i := range pts {
-		if i == 0 {
-			pts[i].X = rand.Float64()
-		} else {
-			pts[i].X = pts[i-1].X + rand.Float64()
-		}
-		pts[i].Y = pts[i].X + 10*rand.Float64()
+		pts[i].X = dataset.X[i]
+		pts[i].Y = dataset.Y[i]
 	}
+
 	return pts
 }

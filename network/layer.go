@@ -23,12 +23,12 @@ func Forward(x *mat.Dense) {
 	a1 := mat.NewDense(1, 3, nil)
 	a1.Mul(x, w1)
 	a1.Add(a1, b1)
-	z1 := af.SigmoidVec(a1)
+	z1 := af.Sigmoid(a1)
 
 	a2 := mat.NewDense(1, 2, nil)
 	a2.Mul(z1, w2)
 	a2.Add(a2, b2)
-	z2 := af.SigmoidVec(a2)
+	z2 := af.Sigmoid(a2)
 
 	a3 := mat.NewDense(1, 2, nil)
 	a3.Mul(z2, w3)

@@ -18,13 +18,19 @@ type display struct {
 	p *plot.Plot
 }
 
-func New() display {
+type Settings struct {
+	Title string
+	X     string
+	Y     string
+}
+
+func New(s Settings) display {
 	p := plot.New()
-	p.Title.Text = "Plotutil example"
-	p.X.Label.Text = "X"
-	p.Y.Label.Text = "Y"
+	p.Title.Text = s.Title
+	p.X.Label.Text = s.X
+	p.Y.Label.Text = s.Y
 	d := display{
-		p: plot.New(),
+		p: p,
 	}
 
 	return d

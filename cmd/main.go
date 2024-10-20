@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	display.New().Show()
+	display.New(display.Settings{Title: "Title", X: "X", Y: "Y"}).Show()
 }

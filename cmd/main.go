@@ -1,8 +1,12 @@
 package main
 
 import (
+	"fmt"
 	af "tutorial/activation-functions"
+
 	"tutorial/display"
+
+	"gonum.org/v1/gonum/mat"
 )
 
 func main() {
@@ -15,4 +19,8 @@ func main() {
 
 	yReLU := af.ReLU(x)
 	display.New(display.Settings{Title: "ReLU Function", X: "X", Y: "Y", Dataset: display.Dataset{X: x, Y: yReLU}, Output: "relu.png"}).Show()
+
+	xVec := mat.NewDense(3, 3, []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4})
+	yVec := af.SigmoidVec(xVec)
+	fmt.Println(yVec)
 }

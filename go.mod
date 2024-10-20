@@ -2,7 +2,10 @@ module tutorial
 
 go 1.23.0
 
-require gonum.org/v1/plot v0.14.0
+require (
+	gonum.org/v1/gonum v0.14.0
+	gonum.org/v1/plot v0.14.0
+)
 
 require (
 	git.sr.ht/~sbinet/gg v0.5.0 // indirect

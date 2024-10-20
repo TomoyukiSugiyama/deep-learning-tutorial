@@ -5,6 +5,8 @@ import (
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/plotutil"
 	"gonum.org/v1/plot/vg"
+
+	"gonum.org/v1/gonum/mat"
 )
 
 type Display interface {
@@ -27,8 +29,10 @@ type Settings struct {
 }
 
 type Dataset struct {
-	X []float64
-	Y []float64
+	X    []float64
+	Y    []float64
+	XVec mat.Matrix
+	YVec mat.Matrix
 }
 
 func New(s Settings) display {

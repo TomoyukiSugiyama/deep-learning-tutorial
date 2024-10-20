@@ -13,8 +13,9 @@ type Display interface {
 }
 
 type display struct {
-	p   *plot.Plot
-	xys plotter.XYs
+	p      *plot.Plot
+	xys    plotter.XYs
+	output string
 }
 
 type Settings struct {
@@ -22,6 +23,7 @@ type Settings struct {
 	X       string
 	Y       string
 	Dataset Dataset
+	Output  string
 }
 
 type Dataset struct {
@@ -37,8 +39,9 @@ func New(s Settings) display {
 	xys := xysFrom(s.Dataset)
 
 	d := display{
-		p:   p,
-		xys: xys,
+		p:      p,
+		xys:    xys,
+		output: s.Output,
 	}
 
 	return d
@@ -51,7 +54,7 @@ func (d display) Show() {
 		panic(err)
 	}
 
-	if err := d.p.Save(4*vg.Inch, 4*vg.Inch, "outputs/points.png"); err != nil {
+	if err := d.p.Save(4*vg.Inch, 4*vg.Inch, "outputs/"+d.output); err != nil {
 		panic(err)
 	}
 }

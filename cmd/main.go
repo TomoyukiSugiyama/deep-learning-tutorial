@@ -7,7 +7,9 @@ import (
 
 func main() {
 	x := af.Arange(-5.0, 5.0, 0.1)
-	y := af.Step(x)
+	yStep := af.Step(x)
+	display.New(display.Settings{Title: "Step Function", X: "X", Y: "Y", Dataset: display.Dataset{X: x, Y: yStep}, Output: "step.png"}).Show()
 
-	display.New(display.Settings{Title: "Step Function", X: "X", Y: "Y", Dataset: display.Dataset{X: x, Y: y}}).Show()
+	ySig := af.Sigmoid(x)
+	display.New(display.Settings{Title: "Sigmoid Function", X: "X", Y: "Y", Dataset: display.Dataset{X: x, Y: ySig}, Output: "sigmoid.png"}).Show()
 }

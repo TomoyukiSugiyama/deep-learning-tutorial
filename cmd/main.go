@@ -27,11 +27,21 @@ func main() {
 	mul.Mul(xMulVec, yMulTVec)
 	display.Print(mul)
 
-	xMat := mat.NewDense(1, 2, []float64{1, 0.5})
-	network := network.InitNetwork()
-	network.Forward(xMat)
-
 	xSoftmax := mat.NewDense(1, 3, []float64{0.3, 2.9, 4.0})
 	ySoftmax := af.Softmax(xSoftmax)
 	display.Print(ySoftmax)
+
+	dataset := network.GetData()
+	// network := network.InitNetwork()
+	_, c := dataset.TestData.Dims()
+	testData := mat.DenseCopyOf(dataset.TestData)
+	// var xMat *mat.Dense
+	// for i := 0; i < r; i++ {
+	// 	xMat = testData.Slice(i, 1, i, c).(*mat.Dense)
+	// 	network.Forward(xMat)
+	// }
+	xMat := testData.Slice(0, 1, 0, c).(*mat.Dense)
+	display.Print(xMat)
+	// network.Forward(xMat)
+
 }

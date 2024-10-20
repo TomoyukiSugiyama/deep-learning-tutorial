@@ -4,11 +4,26 @@ import (
 	af "tutorial/activation-functions"
 	"tutorial/display"
 
+	"github.com/po3rin/gomnist"
 	"gonum.org/v1/gonum/mat"
 )
 
 type Network struct {
 	w1, w2, w3, b1, b2, b3 *mat.Dense
+}
+
+func GetData() gomnist.MNIST {
+	l := gomnist.NewLoader("./datasets", gomnist.Normalization(true), gomnist.OneHotLabel(false))
+
+	dataset, err := l.Load()
+	if err != nil {
+		panic(err)
+	}
+	_ = dataset.TrainData.At(0, 135)
+
+	_ = dataset.TrainLabels
+
+	return dataset
 }
 
 func InitNetwork() Network {

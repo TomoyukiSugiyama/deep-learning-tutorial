@@ -12,4 +12,7 @@ func main() {
 
 	ySig := af.Sigmoid(x)
 	display.New(display.Settings{Title: "Sigmoid Function", X: "X", Y: "Y", Dataset: display.Dataset{X: x, Y: ySig}, Output: "sigmoid.png"}).Show()
+
+	yReLU := af.ReLU(x)
+	display.New(display.Settings{Title: "ReLU Function", X: "X", Y: "Y", Dataset: display.Dataset{X: x, Y: yReLU}, Output: "relu.png"}).Show()
 }

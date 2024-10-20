@@ -1,10 +1,9 @@
 package main
 
 import (
-	"fmt"
 	af "tutorial/activation-functions"
-
 	"tutorial/display"
+	"tutorial/network"
 
 	"gonum.org/v1/gonum/mat"
 )
@@ -22,5 +21,15 @@ func main() {
 
 	xVec := mat.NewDense(3, 3, []float64{-4, -3, -2, -1, 0, 1, 2, 3, 4})
 	yVec := af.SigmoidVec(xVec)
-	fmt.Println(yVec)
+	display.Print(yVec)
+
+	xMulVec := mat.NewDense(1, 2, []float64{3, 2})
+	yMulVec := mat.NewDense(1, 2, []float64{2, 4})
+	yMulTVec := yMulVec.T()
+	mul := mat.NewDense(1, 1, nil)
+	mul.Mul(xMulVec, yMulTVec)
+	display.Print(mul)
+
+	xMat := mat.NewDense(1, 2, []float64{1, 0.5})
+	network.Forward(xMat)
 }

@@ -1,6 +1,8 @@
 package display
 
 import (
+	"fmt"
+
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/plotutil"
@@ -71,4 +73,9 @@ func xysFrom(dataset Dataset) plotter.XYs {
 	}
 
 	return pts
+}
+
+func Print(X mat.Matrix) {
+	fa := mat.Formatted(X, mat.Prefix(""), mat.Squeeze())
+	fmt.Printf("%v\n", fa)
 }

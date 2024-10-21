@@ -3,6 +3,7 @@ module tutorial
 go 1.23.0
 
 require (
+	github.com/nlpodyssey/gopickle v0.3.0
 	github.com/po3rin/gomnist v0.0.0-20190729090533-a707d482e31e
 	gonum.org/v1/gonum v0.14.0
 	gonum.org/v1/plot v0.14.0
@@ -20,5 +21,5 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	golang.org/x/image v0.11.0 // indirect
-	golang.org/x/text v0.12.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 )

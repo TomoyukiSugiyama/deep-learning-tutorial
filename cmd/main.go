@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	af "tutorial/activation-functions"
 	"tutorial/display"
 	"tutorial/network"
@@ -32,16 +33,48 @@ func main() {
 	display.Print(ySoftmax)
 
 	dataset := network.GetData()
-	// network := network.InitNetwork()
-	_, c := dataset.TestData.Dims()
+	network := network.InitNetwork()
+	// display.Print(dataset.TrainData)
+	r, c := dataset.TestData.Dims()
 	testData := mat.DenseCopyOf(dataset.TestData)
-	// var xMat *mat.Dense
-	// for i := 0; i < r; i++ {
-	// 	xMat = testData.Slice(i, 1, i, c).(*mat.Dense)
-	// 	network.Forward(xMat)
-	// }
-	xMat := testData.Slice(0, 1, 0, c).(*mat.Dense)
-	display.Print(xMat)
-	// network.Forward(xMat)
+	var xMat *mat.Dense
+	accuracyCount := 0
+	// display.Print(dataset.TestLabels)
+	for i := 0; i < r; i++ {
+		xMat = testData.Slice(i, i+1, 0, c).(*mat.Dense)
+		xUnFT := mat.DenseCopyOf(mat.NewDense(28, 28, xMat.RawRowView(0)).T())
+		xMatT := mat.NewDense(1, 784, xUnFT.RawMatrix().Data)
+		// need to set Normalization = false
+		// display.Save(strconv.Itoa(i), xMatT)
+		y := network.Forward(xMatT)
+		fmt.Println("--------------------")
+		fmt.Println("Index: ", i)
+		display.Print(y)
+		maxIndex := maxIndex(y)
+		fmt.Println("Predicted: ", maxIndex)
+		fmt.Println("Actual: ", int(dataset.TestLabels.At(i, 0)))
+		if int(dataset.TestLabels.At(i, 0)) == maxIndex {
+			accuracyCount++
+		}
+	}
 
+	fmt.Println("Accuracy Count: ", accuracyCount)
+	fmt.Println("Total Count: ", r)
+	fmt.Println("Accuracy: ", float64(accuracyCount)/float64(r))
+
+}
+
+func maxIndex(d mat.Matrix) int {
+	r, c := d.Dims()
+	max := -9999.0
+	maxIndex := 0
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
+			if d.At(i, j) > max {
+				max = d.At(i, j)
+				maxIndex = i*c + j
+			}
+		}
+	}
+	return maxIndex
 }

@@ -6,7 +6,7 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-func Sigmoid(x mat.Matrix) mat.Matrix {
+func Sigmoid(x mat.Matrix) *mat.Dense {
 	sigmoid := func(i, j int, x float64) float64 {
 		return 1 / (1 + math.Exp(-x))
 	}

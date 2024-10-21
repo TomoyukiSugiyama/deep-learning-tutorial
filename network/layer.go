@@ -52,6 +52,7 @@ func convertFromCSV(filename string) (int, int, []float64) {
 
 func InitNetwork() Network {
 	n := Network{}
+	fmt.Println("caps :")
 	n.w1 = mat.NewDense(convertFromCSV("w1.csv"))
 	fmt.Println(n.w1.Caps())
 	n.b1 = mat.NewDense(convertFromCSV("b1.csv"))
@@ -68,27 +69,42 @@ func InitNetwork() Network {
 }
 
 func (n Network) Forward(x *mat.Dense) *mat.Dense {
-	a1R, a1C := n.b1.Caps()
-	// a1 = x * w1 + b1
-	// z1 = sigmoid(a1)
+	// ab1 = x * w1 + b1
+	// z1 = sigmoid(ab1)
+	a1R, _ := x.Caps()
+	_, a1C := n.b1.Caps()
 	a1 := mat.NewDense(a1R, a1C, nil)
 	a1.Mul(x, n.w1)
-	a1.Add(a1, n.b1)
-	z1 := af.Sigmoid(a1)
-	// a2 = z1 * w2 + b2
-	// z2 = sigmoid(a2)
-	a2R, a2C := n.b2.Caps()
+	ab1 := Add(a1, n.b1)
+	z1 := af.Sigmoid(ab1)
+
+	// ab2 = z1 * w2 + b2
+	// z2 = sigmoid(ab2)
+	a2R, _ := z1.Caps()
+	_, a2C := n.b2.Caps()
 	a2 := mat.NewDense(a2R, a2C, nil)
 	a2.Mul(z1, n.w2)
-	a2.Add(a2, n.b2)
-	z2 := af.Sigmoid(a2)
-	// a3 = z2 * w3 + b3
-	// y = softmax(a3)
-	a3R, a3C := n.b3.Caps()
+	ab2 := Add(a2, n.b2)
+	z2 := af.Sigmoid(ab2)
+
+	// ab3 = z2 * w3 + b3
+	// y = softmax(ab3)
+	a3R, _ := z2.Caps()
+	_, a3C := n.b3.Caps()
 	a3 := mat.NewDense(a3R, a3C, nil)
 	a3.Mul(z2, n.w3)
-	a3.Add(a3, n.b3)
-	y := af.Softmax(a3)
+	ab3 := Add(a3, n.b3)
+
+	y := af.Softmax(ab3)
 
 	return y
+}
+
+func Add(a mat.Matrix, b mat.Matrix) *mat.Dense {
+	var B mat.Dense
+	B.Apply(func(i, j int, v float64) float64 {
+		return v + b.At(0, j)
+	}, a)
+
+	return &B
 }

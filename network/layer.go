@@ -52,18 +52,24 @@ func convertFromCSV(filename string) (int, int, []float64) {
 
 func InitNetwork() Network {
 	n := Network{}
-	fmt.Println("caps :")
+	fmt.Println("caps : row column")
 	n.w1 = mat.NewDense(convertFromCSV("w1.csv"))
+	fmt.Print("w1 : ")
 	fmt.Println(n.w1.Caps())
 	n.b1 = mat.NewDense(convertFromCSV("b1.csv"))
+	fmt.Print("b1 : ")
 	fmt.Println(n.b1.Caps())
 	n.w2 = mat.NewDense(convertFromCSV("w2.csv"))
+	fmt.Print("w2 : ")
 	fmt.Println(n.w2.Caps())
 	n.b2 = mat.NewDense(convertFromCSV("b2.csv"))
+	fmt.Print("b2 : ")
 	fmt.Println(n.b2.Caps())
 	n.w3 = mat.NewDense(convertFromCSV("w3.csv"))
+	fmt.Print("w3 : ")
 	fmt.Println(n.w3.Caps())
 	n.b3 = mat.NewDense(convertFromCSV("b3.csv"))
+	fmt.Print("b3 : ")
 	fmt.Println(n.b3.Caps())
 	return n
 }

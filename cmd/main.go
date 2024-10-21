@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"strconv"
+	"time"
 	af "tutorial/activation-functions"
 	"tutorial/display"
 	"tutorial/network"
@@ -11,32 +13,51 @@ import (
 )
 
 func main() {
+	// Training()
+	TestNetwork()
+}
+
+func Training() {
+	fmt.Println("Training Start")
+	defer fmt.Println("Training End")
+	const batchSize = 100
 	dataset := network.GetData()
+	trainData := mat.DenseCopyOf(dataset.TrainData)
+	trainLavels := mat.DenseCopyOf(dataset.TrainLabels)
 	network := network.InitNetwork()
 
-	const batchSize = 100
+	const iteration = 1
+	fmt.Println("Iteration: ", iteration)
 	fmt.Println("Batch Size: ", batchSize)
-	r, _ := dataset.TestData.Dims()
-	testData := mat.DenseCopyOf(dataset.TestData)
-	batchList := createBatchList(testData, batchSize)
 
 	accuracyCount := 0
-
-	for i, batch := range batchList {
+	for i := 0; i < iteration; i++ {
+		batch, t := randomChoice(trainData, trainLavels, batchSize)
 		y := network.Forward(batch)
 		maxIndexList := maxIndexList(y)
 		for j, maiIndex := range maxIndexList {
-			if int(dataset.TestLabels.At(i*batchSize+j, 0)) == maiIndex {
+			if int(t.At(j, 0)) == maiIndex {
 				accuracyCount++
 			}
 		}
 		fmt.Println("batch("+strconv.Itoa(i)+") Accuracy Count: ", accuracyCount)
 	}
-
 	fmt.Println("Accuracy Count: ", accuracyCount)
-	fmt.Println("Total Count: ", r)
-	fmt.Println("Accuracy: ", float64(accuracyCount)/float64(r))
+	fmt.Println("Total Count: ", batchSize*iteration)
+	fmt.Println("Accuracy: ", float64(accuracyCount)/float64(batchSize*iteration))
+}
 
+func randomChoice(d *mat.Dense, t *mat.Dense, size int) (*mat.Dense, *mat.Dense) {
+	dataT := dataT(d)
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+	randomData := mat.NewDense(size, dataT.RawMatrix().Cols, nil)
+	randomLabel := mat.NewDense(size, t.RawMatrix().Cols, nil)
+	for i := 0; i < size; i++ {
+		r := rnd.Intn(size)
+		randomData.SetRow(i, dataT.RawRowView(r))
+		randomLabel.SetRow(i, t.RawRowView(r))
+	}
+	return randomData, randomLabel
 }
 
 func dataT(d *mat.Dense) *mat.Dense {
@@ -102,4 +123,35 @@ func Test() {
 	xSoftmax := mat.NewDense(1, 3, []float64{0.3, 2.9, 4.0})
 	ySoftmax := af.Softmax(xSoftmax)
 	display.Print(ySoftmax)
+}
+
+func TestNetwork() {
+	fmt.Println("Test Start")
+	defer fmt.Println("Test End")
+
+	dataset := network.GetData()
+	network := network.InitNetwork()
+
+	const batchSize = 100
+	fmt.Println("Batch Size: ", batchSize)
+	testData := mat.DenseCopyOf(dataset.TestData)
+	batchList := createBatchList(testData, batchSize)
+
+	accuracyCount := 0
+
+	for i, batch := range batchList {
+		y := network.Forward(batch)
+		maxIndexList := maxIndexList(y)
+		for j, maiIndex := range maxIndexList {
+			if int(dataset.TestLabels.At(i*batchSize+j, 0)) == maiIndex {
+				accuracyCount++
+			}
+		}
+		fmt.Println("batch("+strconv.Itoa(i)+") Accuracy Count: ", accuracyCount)
+	}
+
+	fmt.Println("Accuracy Count: ", accuracyCount)
+	r, _ := dataset.TestData.Dims()
+	fmt.Println("Total Count: ", r)
+	fmt.Println("Accuracy: ", float64(accuracyCount)/float64(r))
 }

@@ -6,19 +6,22 @@ import (
 	"math/rand"
 
 	af "tutorial/activation-functions"
-	"tutorial/display"
 
 	"gonum.org/v1/gonum/mat"
 )
 
 type TwoLayerNetwork struct {
-	w1, w2, b1, b2 *mat.Dense
-	inputSize      int
-	hiddenSize     int
-	outputSize     int
+	w1, w2, b1, b2                 *mat.Dense
+	w1Grad, w2Grad, b1Grad, b2Grad *mat.Dense
+
+	inputSize  int
+	hiddenSize int
+	outputSize int
+
+	batchSize int
 }
 
-func InitTwoLayerNetwork(inputSize int, hiddenSize int, outputSize int) *TwoLayerNetwork {
+func InitTwoLayerNetwork(inputSize int, hiddenSize int, outputSize int, batchSize int) *TwoLayerNetwork {
 	w1 := generateRandomMatrix(inputSize, hiddenSize)
 	fmt.Print("w1 : ")
 	fmt.Println(w1.Caps())
@@ -31,14 +34,25 @@ func InitTwoLayerNetwork(inputSize int, hiddenSize int, outputSize int) *TwoLaye
 	b2 := generateZeroMatrix(1, outputSize)
 	fmt.Print("b2 : ")
 	fmt.Println(b2.Caps())
-	display.Print(b2)
-	return &TwoLayerNetwork{w1, w2, b1, b2, inputSize, hiddenSize, outputSize}
+
+	tn := TwoLayerNetwork{
+		w1:         w1,
+		w2:         w2,
+		b1:         b1,
+		b2:         b2,
+		inputSize:  inputSize,
+		hiddenSize: hiddenSize,
+		outputSize: outputSize,
+		batchSize:  batchSize,
+	}
+	return &tn
 }
 
 func generateRandomMatrix(row int, column int) *mat.Dense {
+	const waitInitStd = 0.01
 	data := make([]float64, row*column)
 	for i := range data {
-		data[i] = rand.NormFloat64()
+		data[i] = rand.NormFloat64() * waitInitStd
 	}
 	return mat.NewDense(row, column, data)
 }
@@ -49,12 +63,15 @@ func generateZeroMatrix(row int, column int) *mat.Dense {
 }
 
 func (n *TwoLayerNetwork) Predict(x *mat.Dense) *mat.Dense {
-	a1 := mat.NewDense(n.inputSize, n.hiddenSize, nil)
+	// ab1 = x * w1 + b1
+	// z1 = sigmoid(ab1)
+	a1 := mat.NewDense(n.batchSize, n.hiddenSize, nil)
 	a1.Mul(x, n.w1)
 	ab1 := Add(a1, n.b1)
 	z1 := af.Sigmoid(ab1)
-
-	a2 := mat.NewDense(n.hiddenSize, n.outputSize, nil)
+	// ab2 = z1 * w2 + b2
+	// y = softmax(ab2)
+	a2 := mat.NewDense(n.batchSize, n.outputSize, nil)
 	a2.Mul(z1, n.w2)
 	ab2 := Add(a2, n.b2)
 	y := af.Softmax(ab2)
@@ -63,10 +80,10 @@ func (n *TwoLayerNetwork) Predict(x *mat.Dense) *mat.Dense {
 
 func (n *TwoLayerNetwork) Loss(x *mat.Dense, t *mat.Dense) float64 {
 	y := n.Predict(x)
-	return crossEntropyError(y, t)
+	return n.crossEntropyError(y, t)
 }
 
-func crossEntropyError(y *mat.Dense, t *mat.Dense) float64 {
+func (n *TwoLayerNetwork) crossEntropyError(y *mat.Dense, t *mat.Dense) float64 {
 	delta := 1e-7
 	r, c := y.Caps()
 	sum := 0.0
@@ -75,23 +92,49 @@ func crossEntropyError(y *mat.Dense, t *mat.Dense) float64 {
 			sum += t.At(i, j) * math.Log(y.At(i, j)+delta)
 		}
 	}
-	return -sum
+	return -sum / float64(n.batchSize)
 }
 
-func NumericalGradient(f func(*mat.Dense) float64, x *mat.Dense) *mat.Dense {
+func numericalGradient(f func(*mat.Dense) float64, w *mat.Dense) *mat.Dense {
 	h := 1e-4
-	r, c := x.Caps()
+	r, c := w.Caps()
 	grad := mat.NewDense(r, c, nil)
 	for i := 0; i < r; i++ {
 		for j := 0; j < c; j++ {
-			tmpVal := x.At(i, j)
-			x.Set(i, j, tmpVal+h)
-			fxh1 := f(x)
-			x.Set(i, j, tmpVal-h)
-			fxh2 := f(x)
+			tmp := w.At(i, j)
+			w.Set(i, j, tmp+h)
+			fxh1 := f(w)
+			w.Set(i, j, tmp-h)
+			fxh2 := f(w)
 			grad.Set(i, j, (fxh1-fxh2)/(2*h))
-			x.Set(i, j, tmpVal)
+			w.Set(i, j, tmp)
 		}
 	}
 	return grad
+}
+
+func (n *TwoLayerNetwork) NumericalGradient(x *mat.Dense, t *mat.Dense) {
+	lossW := func(w *mat.Dense) float64 {
+		return n.Loss(x, t)
+	}
+	n.w1Grad = numericalGradient(lossW, n.w1)
+	n.w2Grad = numericalGradient(lossW, n.w2)
+	n.b1Grad = numericalGradient(lossW, n.b1)
+	n.b2Grad = numericalGradient(lossW, n.b2)
+}
+
+func updateParams(w *mat.Dense, grad *mat.Dense, lr float64) {
+	r, c := w.Caps()
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
+			w.Set(i, j, w.At(i, j)-lr*grad.At(i, j))
+		}
+	}
+}
+
+func (n *TwoLayerNetwork) UpdateParams(lr float64) {
+	updateParams(n.w1, n.w1Grad, lr)
+	updateParams(n.w2, n.w2Grad, lr)
+	updateParams(n.b1, n.b1Grad, lr)
+	updateParams(n.b2, n.b2Grad, lr)
 }

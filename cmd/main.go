@@ -164,7 +164,34 @@ func TestTwoLayerNetwork() {
 	const inputSize = 784
 	const hiddenSize = 50
 	const outputSize = 10
-	_ = network.InitTwoLayerNetwork(inputSize, hiddenSize, outputSize)
+	const batchSize = 100
+	dataset := network.GetData()
+	trainData := mat.DenseCopyOf(dataset.TrainData)
+	trainLabels := mat.DenseCopyOf(dataset.TrainLabels)
+	network := network.InitTwoLayerNetwork(inputSize, hiddenSize, outputSize, batchSize)
+
+	const iteration = 10
+	const leaningRate = 0.1
+	trainLossList := make([]float64, iteration)
+	iterationList := make([]float64, iteration)
+	for i := 0; i < iteration; i++ {
+		randomChoice(trainData, trainLabels, batchSize)
+		batch, t := randomChoice(trainData, trainLabels, batchSize)
+
+		network.NumericalGradient(batch, t)
+		network.UpdateParams(leaningRate)
+		trainLossList[i] = network.Loss(batch, t)
+		iterationList[i] = float64(i)
+		fmt.Println("Network Loss : ", trainLossList[i])
+	}
 	// network.Loss()
 
+	s := display.Settings{
+		Title:   "Loss",
+		X:       "Iteration",
+		Y:       "Loss",
+		Dataset: display.Dataset{X: iterationList, Y: trainLossList},
+		Output:  "loss.png",
+	}
+	display.New(s).Show()
 }

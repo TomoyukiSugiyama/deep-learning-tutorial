@@ -16,7 +16,7 @@ type Network struct {
 }
 
 func GetData() gomnist.MNIST {
-	l := gomnist.NewLoader("./datasets", gomnist.Normalization(true), gomnist.OneHotLabel(false))
+	l := gomnist.NewLoader("./datasets", gomnist.Normalization(true), gomnist.OneHotLabel(true))
 
 	dataset, err := l.Load()
 	if err != nil {

@@ -49,10 +49,10 @@ func InitTwoLayerNetwork(inputSize int, hiddenSize int, outputSize int, batchSiz
 }
 
 func generateRandomMatrix(row int, column int) *mat.Dense {
-	const waitInitStd = 0.01
+	const weightInitStd = 0.01
 	data := make([]float64, row*column)
 	for i := range data {
-		data[i] = rand.NormFloat64() * waitInitStd
+		data[i] = rand.NormFloat64() * weightInitStd
 	}
 	return mat.NewDense(row, column, data)
 }

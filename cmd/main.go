@@ -175,16 +175,13 @@ func TestTwoLayerNetwork() {
 	trainLossList := make([]float64, iteration)
 	iterationList := make([]float64, iteration)
 	for i := 0; i < iteration; i++ {
-		randomChoice(trainData, trainLabels, batchSize)
 		batch, t := randomChoice(trainData, trainLabels, batchSize)
-
 		network.NumericalGradient(batch, t)
 		network.UpdateParams(leaningRate)
 		trainLossList[i] = network.Loss(batch, t)
 		iterationList[i] = float64(i)
-		fmt.Println("Network Loss : ", trainLossList[i])
+		fmt.Println("Loss (", strconv.Itoa(i), ") :", trainLossList[i])
 	}
-	// network.Loss()
 
 	s := display.Settings{
 		Title:   "Loss",

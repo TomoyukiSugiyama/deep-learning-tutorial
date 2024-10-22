@@ -14,7 +14,8 @@ import (
 
 func main() {
 	// Training()
-	TestNetwork()
+	// TestNetwork()
+	TestTwoLayerNetwork()
 }
 
 func Training() {
@@ -154,4 +155,16 @@ func TestNetwork() {
 	r, _ := dataset.TestData.Dims()
 	fmt.Println("Total Count: ", r)
 	fmt.Println("Accuracy: ", float64(accuracyCount)/float64(r))
+}
+
+func TestTwoLayerNetwork() {
+	fmt.Println("Test Start")
+	defer fmt.Println("Test End")
+
+	const inputSize = 784
+	const hiddenSize = 50
+	const outputSize = 10
+	_ = network.InitTwoLayerNetwork(inputSize, hiddenSize, outputSize)
+	// network.Loss()
+
 }

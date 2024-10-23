@@ -14,11 +14,23 @@ import (
 )
 
 func main() {
-	CalcPrice()
+	ReLU()
+	// CalcPrice()
 	// Training()
 	// TestNetwork()
 	// TrainTwoLayerNetwork()
 
+}
+func ReLU() {
+	x := []float64{-1.0, 1.0, 2.0, -2.0}
+	xMat := mat.NewDense(2, 2, x)
+	display.Print(xMat)
+	reluLayer := layers.InitReLU()
+	reluLayer.Forward(xMat)
+
+	dout := mat.NewDense(2, 2, []float64{5.0, -2.0, 7.0, 4.0})
+	dx := reluLayer.Backward(dout)
+	display.Print(dx)
 }
 
 func CalcPrice() {

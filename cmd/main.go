@@ -172,13 +172,14 @@ func TrainTwoLayerNetwork() {
 	testLabels := mat.DenseCopyOf(dataset.TestLabels)
 	network := network.InitTwoLayerNetwork(inputSize, hiddenSize, outputSize, batchSize)
 
-	const iteration = 10
-	const leaningRate = 1.0
+	const iteration = 1000
+	const leaningRate = 0.1
 	trainLossList := make([]float64, iteration)
 	iterationList := make([]float64, iteration)
 	trainAccList := make([]float64, iteration)
 	testAccList := make([]float64, iteration)
-
+	fmt.Println(">> Iteration: ", iteration)
+	fmt.Println(">> Leaning Rate: ", leaningRate)
 	fmt.Println(">> Train Total Count: ", trainData.RawMatrix().Rows)
 	fmt.Println(">> Test Total Count: ", testData.RawMatrix().Rows)
 

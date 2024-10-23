@@ -14,8 +14,8 @@ import (
 )
 
 func main() {
-	Sigmoid()
-	// ReLU()
+	// Sigmoid()
+	ReLU()
 	// CalcPrice()
 	// Training()
 	// TestNetwork()
@@ -40,8 +40,8 @@ func ReLU() {
 	xMat := mat.NewDense(2, 2, x)
 	display.Print(xMat)
 	reluLayer := layers.InitReLU()
-	reluLayer.Forward(xMat)
-
+	y := reluLayer.Forward(xMat)
+	display.Print(y)
 	dout := mat.NewDense(2, 2, []float64{5.0, -2.0, 7.0, 4.0})
 	dx := reluLayer.Backward(dout)
 	display.Print(dx)

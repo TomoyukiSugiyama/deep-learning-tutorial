@@ -23,16 +23,16 @@ type TwoLayerNetwork struct {
 
 func InitTwoLayerNetwork(inputSize int, hiddenSize int, outputSize int, batchSize int) *TwoLayerNetwork {
 	w1 := generateRandomMatrix(inputSize, hiddenSize)
-	fmt.Print("w1 : ")
+	fmt.Print(">> w1 : ")
 	fmt.Println(w1.Caps())
 	w2 := generateRandomMatrix(hiddenSize, outputSize)
-	fmt.Print("w2 : ")
+	fmt.Print(">> w2 : ")
 	fmt.Println(w2.Caps())
 	b1 := generateZeroMatrix(1, hiddenSize)
-	fmt.Print("b1 : ")
+	fmt.Print(">> b1 : ")
 	fmt.Println(b1.Caps())
 	b2 := generateZeroMatrix(1, outputSize)
-	fmt.Print("b2 : ")
+	fmt.Print(">> b2 : ")
 	fmt.Println(b2.Caps())
 
 	tn := TwoLayerNetwork{
@@ -137,4 +137,37 @@ func (n *TwoLayerNetwork) UpdateParams(lr float64) {
 	updateParams(n.w2, n.w2Grad, lr)
 	updateParams(n.b1, n.b1Grad, lr)
 	updateParams(n.b2, n.b2Grad, lr)
+}
+
+func (n *TwoLayerNetwork) Accuracy(x *mat.Dense, t *mat.Dense) float64 {
+	r, _ := t.Dims()
+	tmp := n.batchSize
+	n.batchSize = r
+
+	y := n.Predict(x)
+	maxIndexList := maxIndexList(y)
+	accuracyCount := 0
+	for i := 0; i < r; i++ {
+		if int(t.At(i, 0)) == maxIndexList[i] {
+			accuracyCount++
+		}
+	}
+	n.batchSize = tmp
+	return float64(accuracyCount) / float64(r)
+}
+
+func maxIndexList(d mat.Matrix) []int {
+	r, c := d.Dims()
+
+	maxList := make([]float64, r)
+	maxIndexList := make([]int, r)
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
+			if d.At(i, j) > maxList[i] {
+				maxList[i] = d.At(i, j)
+				maxIndexList[i] = j
+			}
+		}
+	}
+	return maxIndexList
 }

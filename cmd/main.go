@@ -15,7 +15,7 @@ import (
 func main() {
 	// Training()
 	// TestNetwork()
-	TestTwoLayerNetwork()
+	TrainTwoLayerNetwork()
 }
 
 func Training() {
@@ -157,9 +157,9 @@ func TestNetwork() {
 	fmt.Println("Accuracy: ", float64(accuracyCount)/float64(r))
 }
 
-func TestTwoLayerNetwork() {
-	fmt.Println("Test Start")
-	defer fmt.Println("Test End")
+func TrainTwoLayerNetwork() {
+	fmt.Println("Train Start")
+	defer fmt.Println("Train End")
 
 	const inputSize = 784
 	const hiddenSize = 50
@@ -168,27 +168,59 @@ func TestTwoLayerNetwork() {
 	dataset := network.GetData()
 	trainData := mat.DenseCopyOf(dataset.TrainData)
 	trainLabels := mat.DenseCopyOf(dataset.TrainLabels)
+	testData := mat.DenseCopyOf(dataset.TestData)
+	testLabels := mat.DenseCopyOf(dataset.TestLabels)
 	network := network.InitTwoLayerNetwork(inputSize, hiddenSize, outputSize, batchSize)
 
 	const iteration = 10
-	const leaningRate = 0.1
+	const leaningRate = 1.0
 	trainLossList := make([]float64, iteration)
 	iterationList := make([]float64, iteration)
+	trainAccList := make([]float64, iteration)
+	testAccList := make([]float64, iteration)
+
+	fmt.Println(">> Train Total Count: ", trainData.RawMatrix().Rows)
+	fmt.Println(">> Test Total Count: ", testData.RawMatrix().Rows)
+
 	for i := 0; i < iteration; i++ {
 		batch, t := randomChoice(trainData, trainLabels, batchSize)
 		network.NumericalGradient(batch, t)
 		network.UpdateParams(leaningRate)
+		// check result
 		trainLossList[i] = network.Loss(batch, t)
 		iterationList[i] = float64(i)
 		fmt.Println("Loss (", strconv.Itoa(i), ") :", trainLossList[i])
+		trainAccList[i] = network.Accuracy(trainData, trainLabels)
+		fmt.Println("Train Accuracy: ", trainAccList[i])
+		testAccList[i] = network.Accuracy(testData, testLabels)
+		fmt.Println("Test Accuracy: ", testAccList[i])
 	}
 
-	s := display.Settings{
+	loss := display.Settings{
 		Title:   "Loss",
 		X:       "Iteration",
 		Y:       "Loss",
 		Dataset: display.Dataset{X: iterationList, Y: trainLossList},
 		Output:  "loss.png",
 	}
-	display.New(s).Show()
+	display.New(loss).Show()
+
+	train := display.Settings{
+		Title:   "Train Accuracy",
+		X:       "Iteration",
+		Y:       "Accuracy",
+		Dataset: display.Dataset{X: iterationList, Y: trainAccList},
+		Output:  "train-accuracy.png",
+	}
+	display.New(train).Show()
+
+	test := display.Settings{
+		Title:   "Test Accuracy",
+		X:       "Iteration",
+		Y:       "Accuracy",
+		Dataset: display.Dataset{X: iterationList, Y: testAccList},
+		Output:  "test-accuracy.png",
+	}
+	display.New(test).Show()
+
 }

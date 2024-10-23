@@ -24,20 +24,32 @@ func main() {
 func CalcPrice() {
 	const apple = 100
 	const appleNum = 2
+	const orange = 150
+	const orangeNum = 3
 	const tax = 1.1
 
 	mulAppleLayer := layers.InitMul()
+	mulOrangeLayer := layers.InitMul()
+	addAppleOrangeLayer := layers.InitAdd()
 	mulTaxLayer := layers.InitMul()
 
 	applePrice := mulAppleLayer.Forward(apple, appleNum)
-	price := mulTaxLayer.Forward(applePrice, tax)
+	orangePrice := mulOrangeLayer.Forward(orange, orangeNum)
+	allPrice := addAppleOrangeLayer.Forward(applePrice, orangePrice)
+	price := mulTaxLayer.Forward(allPrice, tax)
 	fmt.Println("Price: ", price)
 
 	dPrice := 1.0
-	dApplePrice, dTax := mulTaxLayer.Backward(dPrice)
+	dAllPrice, dTax := mulTaxLayer.Backward(dPrice)
+	dApplePrice, dOrangePrice := addAppleOrangeLayer.Backward(dAllPrice)
+	dOrange, dOrangeNum := mulOrangeLayer.Backward(dOrangePrice)
 	dApple, dAppleNum := mulAppleLayer.Backward(dApplePrice)
+
 	fmt.Println("dApple: ", dApple)
 	fmt.Println("dAppleNum: ", dAppleNum)
+	fmt.Println("dOrange: ", dOrange)
+	fmt.Println("dOrangeNum: ", dOrangeNum)
+
 	fmt.Println("dTax: ", dTax)
 }
 

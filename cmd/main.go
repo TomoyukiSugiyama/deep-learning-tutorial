@@ -7,15 +7,38 @@ import (
 	"time"
 	af "tutorial/activation-functions"
 	"tutorial/display"
+	"tutorial/layers"
 	"tutorial/network"
 
 	"gonum.org/v1/gonum/mat"
 )
 
 func main() {
+	CalcPrice()
 	// Training()
 	// TestNetwork()
-	TrainTwoLayerNetwork()
+	// TrainTwoLayerNetwork()
+
+}
+
+func CalcPrice() {
+	const apple = 100
+	const appleNum = 2
+	const tax = 1.1
+
+	mulAppleLayer := layers.InitMul()
+	mulTaxLayer := layers.InitMul()
+
+	applePrice := mulAppleLayer.Forward(apple, appleNum)
+	price := mulTaxLayer.Forward(applePrice, tax)
+	fmt.Println("Price: ", price)
+
+	dPrice := 1.0
+	dApplePrice, dTax := mulTaxLayer.Backward(dPrice)
+	dApple, dAppleNum := mulAppleLayer.Backward(dApplePrice)
+	fmt.Println("dApple: ", dApple)
+	fmt.Println("dAppleNum: ", dAppleNum)
+	fmt.Println("dTax: ", dTax)
 }
 
 func Training() {

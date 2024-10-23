@@ -14,13 +14,27 @@ import (
 )
 
 func main() {
-	ReLU()
+	Sigmoid()
+	// ReLU()
 	// CalcPrice()
 	// Training()
 	// TestNetwork()
 	// TrainTwoLayerNetwork()
 
 }
+
+func Sigmoid() {
+	x := []float64{-1.0, 1.0, 2.0, -2.0}
+	xMat := mat.NewDense(2, 2, x)
+	display.Print(xMat)
+	sigmoidLayer := layers.InitSigmoid()
+	y := sigmoidLayer.Forward(xMat)
+	display.Print(y)
+	dout := mat.NewDense(2, 2, []float64{5.0, -2.0, 7.0, 4.0})
+	dx := sigmoidLayer.Backward(dout)
+	display.Print(dx)
+}
+
 func ReLU() {
 	x := []float64{-1.0, 1.0, 2.0, -2.0}
 	xMat := mat.NewDense(2, 2, x)
@@ -217,7 +231,7 @@ func TrainTwoLayerNetwork() {
 	trainLabels := mat.DenseCopyOf(dataset.TrainLabels)
 	testData := mat.DenseCopyOf(dataset.TestData)
 	testLabels := mat.DenseCopyOf(dataset.TestLabels)
-	network := network.InitTwoLayerNetwork(inputSize, hiddenSize, outputSize, batchSize)
+	network := network.InitTwoLayerNetwork(inputSize, hiddenSize, outputSize)
 
 	const iteration = 1000
 	const leaningRate = 0.1

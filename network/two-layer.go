@@ -17,11 +17,9 @@ type TwoLayerNetwork struct {
 	inputSize  int
 	hiddenSize int
 	outputSize int
-
-	batchSize int
 }
 
-func InitTwoLayerNetwork(inputSize int, hiddenSize int, outputSize int, batchSize int) *TwoLayerNetwork {
+func InitTwoLayerNetwork(inputSize int, hiddenSize int, outputSize int) *TwoLayerNetwork {
 	w1 := generateRandomMatrix(inputSize, hiddenSize)
 	fmt.Print(">> w1 : ")
 	fmt.Println(w1.Caps())
@@ -43,7 +41,6 @@ func InitTwoLayerNetwork(inputSize int, hiddenSize int, outputSize int, batchSiz
 		inputSize:  inputSize,
 		hiddenSize: hiddenSize,
 		outputSize: outputSize,
-		batchSize:  batchSize,
 	}
 	return &tn
 }
@@ -63,15 +60,16 @@ func generateZeroMatrix(row int, column int) *mat.Dense {
 }
 
 func (n *TwoLayerNetwork) Predict(x *mat.Dense) *mat.Dense {
+	batchSize := x.RawMatrix().Rows
 	// ab1 = x * w1 + b1
 	// z1 = sigmoid(ab1)
-	a1 := mat.NewDense(n.batchSize, n.hiddenSize, nil)
+	a1 := mat.NewDense(batchSize, n.hiddenSize, nil)
 	a1.Mul(x, n.w1)
 	ab1 := Add(a1, n.b1)
 	z1 := af.Sigmoid(ab1)
 	// ab2 = z1 * w2 + b2
 	// y = softmax(ab2)
-	a2 := mat.NewDense(n.batchSize, n.outputSize, nil)
+	a2 := mat.NewDense(batchSize, n.outputSize, nil)
 	a2.Mul(z1, n.w2)
 	ab2 := Add(a2, n.b2)
 	y := af.Softmax(ab2)
@@ -92,7 +90,7 @@ func (n *TwoLayerNetwork) crossEntropyError(y *mat.Dense, t *mat.Dense) float64 
 			sum += t.At(i, j) * math.Log(y.At(i, j)+delta)
 		}
 	}
-	return -sum / float64(n.batchSize)
+	return -sum / float64(r)
 }
 
 func numericalGradient(f func(*mat.Dense) float64, w *mat.Dense) *mat.Dense {
@@ -141,18 +139,15 @@ func (n *TwoLayerNetwork) UpdateParams(lr float64) {
 
 func (n *TwoLayerNetwork) Accuracy(x *mat.Dense, t *mat.Dense) float64 {
 	r, _ := t.Dims()
-	tmp := n.batchSize
-	n.batchSize = r
 
 	y := n.Predict(x)
 	maxIndexList := maxIndexList(y)
 	accuracyCount := 0
-	for i := 0; i < r; i++ {
-		if int(t.At(i, 0)) == maxIndexList[i] {
+	for i, j := range maxIndexList {
+		if int(t.At(i, j)) == 1 {
 			accuracyCount++
 		}
 	}
-	n.batchSize = tmp
 	return float64(accuracyCount) / float64(r)
 }
 

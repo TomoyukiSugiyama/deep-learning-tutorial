@@ -14,13 +14,41 @@ import (
 )
 
 func main() {
+	Affine()
 	// Sigmoid()
-	ReLU()
+	// ReLU()
 	// CalcPrice()
 	// Training()
 	// TestNetwork()
 	// TrainTwoLayerNetwork()
 
+}
+
+func Affine() {
+	x := []float64{1.0, 2.0, 3.0, 4.0, 5.0, 6.0}
+	w := []float64{1.0, 2.0, 3.0, 4.0}
+	b := []float64{1.0, 2.0}
+	xMat := mat.NewDense(3, 2, x)
+	wMat := mat.NewDense(2, 2, w)
+	bMat := mat.NewDense(1, 2, b)
+	fmt.Println("Input")
+	fmt.Println("x")
+	display.Print(xMat)
+	fmt.Println("w")
+	display.Print(wMat)
+	fmt.Println("b")
+	display.Print(bMat)
+	affineLayer := layers.InitAffine(wMat, bMat)
+	fmt.Println("Forward")
+	y := affineLayer.Forward(xMat)
+	display.Print(y)
+	fmt.Println("Backward")
+	dout := mat.NewDense(3, 2, []float64{5.0, -2.0, 7.0, 4.0, 3.0, 1.0})
+	fmt.Println("dout")
+	display.Print(dout)
+	dx := affineLayer.Backward(dout)
+	fmt.Println("dx")
+	display.Print(dx)
 }
 
 func Sigmoid() {

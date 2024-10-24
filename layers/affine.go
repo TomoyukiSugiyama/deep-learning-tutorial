@@ -42,3 +42,12 @@ func (a *Affine) Backward(dout *mat.Dense) *mat.Dense {
 func (a *Affine) GetGrads() (*mat.Dense, *mat.Dense) {
 	return a.dw, a.db
 }
+
+func (a *Affine) UpdateParams(learningRate float64) {
+	dwTmp := mat.NewDense(a.dw.RawMatrix().Rows, a.dw.RawMatrix().Cols, nil)
+	dbTmp := mat.NewDense(a.db.RawMatrix().Rows, a.db.RawMatrix().Cols, nil)
+	dwTmp.Scale(learningRate, a.dw)
+	dbTmp.Scale(learningRate, a.db)
+	a.w.Sub(a.w, dwTmp)
+	a.b.Sub(a.b, dbTmp)
+}

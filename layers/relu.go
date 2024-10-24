@@ -21,7 +21,7 @@ func (r *ReLU) Forward(x *mat.Dense) *mat.Dense {
 	relu := func(i, j int, v float64) float64 {
 		if v <= 0 {
 			r.mask[i][j] = true
-			return 0
+			return 0.0
 		}
 		r.mask[i][j] = false
 		return v
@@ -46,4 +46,7 @@ func (r *ReLU) Backward(dout *mat.Dense) *mat.Dense {
 
 func (r *ReLU) GetGrads() (*mat.Dense, *mat.Dense) {
 	return nil, nil
+}
+
+func (r *ReLU) UpdateParams(learningRate float64) {
 }

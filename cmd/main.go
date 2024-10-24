@@ -14,14 +14,60 @@ import (
 )
 
 func main() {
-	SoftmaxWithLoss()
+	// network.NumericalGradientTest()
+	// Gradient()
+	// SoftmaxWithLoss()
 	// Affine()
 	// Sigmoid()
-	// ReLU()
+	ReLU()
 	// CalcPrice()
 	// Training()
 	// TestNetwork()
 	// TrainTwoLayerNetwork()
+
+}
+
+func Gradient() {
+	const inputSize = 784
+	const hiddenSize = 50
+	const outputSize = 10
+	const batchSize = 3
+	dataset := network.GetData()
+	trainData := mat.DenseCopyOf(dataset.TrainData)
+	trainLabels := mat.DenseCopyOf(dataset.TrainLabels)
+	network := network.InitTwoLayerNetwork(inputSize, hiddenSize, outputSize)
+
+	batch, t := randomChoice(trainData, trainLabels, batchSize)
+	fmt.Println("batch")
+	display.Print(batch)
+	fmt.Println("t")
+	display.Print(t)
+	// numerical gradient
+	// network.NumericalGradient(batch, t)
+	// w1NGrad, b1NGrad, w2NGrad, b2NGrad := network.GetGrads()
+	// backpropagation
+	network.Gradient(batch, t)
+	// w1Grad, b1Grad, w2Grad, b2Grad := network.GetGrads()
+
+	// diff := func(x *mat.Dense, y *mat.Dense) float64 {
+	// 	r, c := x.Caps()
+	// 	sum := 0.0
+	// 	for i := 0; i < r; i++ {
+	// 		for j := 0; j < c; j++ {
+	// 			sum += math.Abs(x.At(i, j) - y.At(i, j))
+	// 		}
+	// 	}
+	// 	return sum / float64(r*c)
+	// }
+
+	// fmt.Println("w1Grad - w1NGrad")
+	// fmt.Println(diff(w1Grad, w1NGrad))
+	// fmt.Println("w2Grad - w2NGrad")
+	// fmt.Println(diff(w2Grad, w2NGrad))
+	// fmt.Println("b1Grad - b1NGrad")
+	// fmt.Println(diff(b1Grad, b1NGrad))
+	// fmt.Println("b2Grad - b2NGrad")
+	// fmt.Println(diff(b2Grad, b2NGrad))
 
 }
 
@@ -73,24 +119,36 @@ func Affine() {
 func Sigmoid() {
 	x := []float64{-1.0, 1.0, 2.0, -2.0}
 	xMat := mat.NewDense(2, 2, x)
+	fmt.Println("Input")
+	fmt.Println("x")
 	display.Print(xMat)
 	sigmoidLayer := layers.InitSigmoid()
+	fmt.Println("Forward")
 	y := sigmoidLayer.Forward(xMat)
 	display.Print(y)
 	dout := mat.NewDense(2, 2, []float64{5.0, -2.0, 7.0, 4.0})
+	fmt.Println("Backward")
+	display.Print(dout)
 	dx := sigmoidLayer.Backward(dout)
+	fmt.Println("dx")
 	display.Print(dx)
 }
 
 func ReLU() {
 	x := []float64{-1.0, 1.0, 2.0, -2.0}
 	xMat := mat.NewDense(2, 2, x)
+	fmt.Println("Input")
+	fmt.Println("x")
 	display.Print(xMat)
 	reluLayer := layers.InitReLU()
+	fmt.Println("Forward")
 	y := reluLayer.Forward(xMat)
 	display.Print(y)
 	dout := mat.NewDense(2, 2, []float64{5.0, -2.0, 7.0, 4.0})
+	fmt.Println("Backward")
+	display.Print(dout)
 	dx := reluLayer.Backward(dout)
+	fmt.Println("dx")
 	display.Print(dx)
 }
 
@@ -162,7 +220,7 @@ func randomChoice(d *mat.Dense, t *mat.Dense, size int) (*mat.Dense, *mat.Dense)
 	randomData := mat.NewDense(size, dataT.RawMatrix().Cols, nil)
 	randomLabel := mat.NewDense(size, t.RawMatrix().Cols, nil)
 	for i := 0; i < size; i++ {
-		r := rnd.Intn(size)
+		r := rnd.Intn(dataT.RawMatrix().Rows)
 		randomData.SetRow(i, dataT.RawRowView(r))
 		randomLabel.SetRow(i, t.RawRowView(r))
 	}
@@ -272,7 +330,7 @@ func TrainTwoLayerNetwork() {
 	const inputSize = 784
 	const hiddenSize = 50
 	const outputSize = 10
-	const batchSize = 100
+	const batchSize = 10
 	dataset := network.GetData()
 	trainData := mat.DenseCopyOf(dataset.TrainData)
 	trainLabels := mat.DenseCopyOf(dataset.TrainLabels)
@@ -280,7 +338,7 @@ func TrainTwoLayerNetwork() {
 	testLabels := mat.DenseCopyOf(dataset.TestLabels)
 	network := network.InitTwoLayerNetwork(inputSize, hiddenSize, outputSize)
 
-	const iteration = 1000
+	const iteration = 100
 	const leaningRate = 0.1
 	trainLossList := make([]float64, iteration)
 	iterationList := make([]float64, iteration)
@@ -293,7 +351,9 @@ func TrainTwoLayerNetwork() {
 
 	for i := 0; i < iteration; i++ {
 		batch, t := randomChoice(trainData, trainLabels, batchSize)
-		network.NumericalGradient(batch, t)
+		// display.Print(batch)
+		// network.NumericalGradient(batch, t)
+		network.Gradient(batch, t)
 		network.UpdateParams(leaningRate)
 		// check result
 		trainLossList[i] = network.Loss(batch, t)

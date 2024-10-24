@@ -2,9 +2,9 @@ package network
 
 import (
 	"fmt"
-	"math"
 	"math/rand"
 
+	"tutorial/display"
 	l "tutorial/layers"
 
 	"gonum.org/v1/gonum/mat"
@@ -74,6 +74,7 @@ func InitTwoLayerNetwork(inputSize int, hiddenSize int, outputSize int) *TwoLaye
 func (n *TwoLayerNetwork) Predict(x *mat.Dense) *mat.Dense {
 	for _, layer := range n.layers.Layers {
 		x = layer.Forward(x)
+		display.Print(x)
 	}
 
 	// batchSize := x.RawMatrix().Rows
@@ -111,17 +112,17 @@ func (n *TwoLayerNetwork) Gradient(x *mat.Dense, t *mat.Dense) {
 	n.w2Grad, n.b2Grad = n.layers.Layers[2].GetGrads()
 }
 
-func (n *TwoLayerNetwork) crossEntropyError(y *mat.Dense, t *mat.Dense) float64 {
-	delta := 1e-7
-	r, c := y.Caps()
-	sum := 0.0
-	for i := 0; i < r; i++ {
-		for j := 0; j < c; j++ {
-			sum += t.At(i, j) * math.Log(y.At(i, j)+delta)
-		}
-	}
-	return -sum / float64(r)
-}
+// func (n *TwoLayerNetwork) crossEntropyError(y *mat.Dense, t *mat.Dense) float64 {
+// 	delta := 1e-7
+// 	r, c := y.Caps()
+// 	sum := 0.0
+// 	for i := 0; i < r; i++ {
+// 		for j := 0; j < c; j++ {
+// 			sum += t.At(i, j) * math.Log(y.At(i, j)+delta)
+// 		}
+// 	}
+// 	return -sum / float64(r)
+// }
 
 func numericalGradient(f func(*mat.Dense) float64, w *mat.Dense) *mat.Dense {
 	h := 1e-4
@@ -139,6 +140,15 @@ func numericalGradient(f func(*mat.Dense) float64, w *mat.Dense) *mat.Dense {
 		}
 	}
 	return grad
+}
+
+func NumericalGradientTest() {
+	f := func(x *mat.Dense) float64 {
+		return x.At(0, 0)*x.At(0, 0) + x.At(1, 0)*x.At(1, 0)
+	}
+	x := mat.NewDense(2, 1, []float64{3, 0})
+	grad := numericalGradient(f, x)
+	display.Print(grad)
 }
 
 func (n *TwoLayerNetwork) NumericalGradient(x *mat.Dense, t *mat.Dense) {
@@ -161,15 +171,17 @@ func updateParams(w *mat.Dense, grad *mat.Dense, lr float64) {
 }
 
 func (n *TwoLayerNetwork) UpdateParams(lr float64) {
-	updateParams(n.w1, n.w1Grad, lr)
-	updateParams(n.w2, n.w2Grad, lr)
-	updateParams(n.b1, n.b1Grad, lr)
-	updateParams(n.b2, n.b2Grad, lr)
+	// updateParams(n.w1, n.w1Grad, lr)
+	// updateParams(n.w2, n.w2Grad, lr)
+	// updateParams(n.b1, n.b1Grad, lr)
+	// updateParams(n.b2, n.b2Grad, lr)
+
+	for _, layer := range n.layers.Layers {
+		layer.UpdateParams(lr)
+	}
 }
 
 func (n *TwoLayerNetwork) Accuracy(x *mat.Dense, t *mat.Dense) float64 {
-	r, _ := t.Dims()
-
 	y := n.Predict(x)
 	maxIndexList := maxIndexList(y)
 	accuracyCount := 0
@@ -178,7 +190,7 @@ func (n *TwoLayerNetwork) Accuracy(x *mat.Dense, t *mat.Dense) float64 {
 			accuracyCount++
 		}
 	}
-	return float64(accuracyCount) / float64(r)
+	return float64(accuracyCount) / float64(t.RawMatrix().Rows)
 }
 
 func maxIndexList(d mat.Matrix) []int {
@@ -187,6 +199,7 @@ func maxIndexList(d mat.Matrix) []int {
 	maxList := make([]float64, r)
 	maxIndexList := make([]int, r)
 	for i := 0; i < r; i++ {
+		maxList[i] = -99.0
 		for j := 0; j < c; j++ {
 			if d.At(i, j) > maxList[i] {
 				maxList[i] = d.At(i, j)
@@ -195,4 +208,13 @@ func maxIndexList(d mat.Matrix) []int {
 		}
 	}
 	return maxIndexList
+}
+
+func (n *TwoLayerNetwork) GetGrads() (*mat.Dense, *mat.Dense, *mat.Dense, *mat.Dense) {
+	w1Grad := mat.DenseCopyOf(n.w1Grad)
+	b1Grad := mat.DenseCopyOf(n.b1Grad)
+	w2Grad := mat.DenseCopyOf(n.w2Grad)
+	b2Grad := mat.DenseCopyOf(n.b2Grad)
+
+	return w1Grad, b1Grad, w2Grad, b2Grad
 }

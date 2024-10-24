@@ -12,6 +12,7 @@ type Layer interface {
 	Forward(x *mat.Dense) *mat.Dense
 	Backward(dout *mat.Dense) *mat.Dense
 	GetGrads() (*mat.Dense, *mat.Dense)
+	UpdateParams(learningRate float64)
 }
 
 func InitLayers() *Layers {

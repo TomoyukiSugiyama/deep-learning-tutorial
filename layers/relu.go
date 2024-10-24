@@ -43,3 +43,7 @@ func (r *ReLU) Backward(dout *mat.Dense) *mat.Dense {
 	dx.Apply(reluBackward, dout)
 	return dx
 }
+
+func (r *ReLU) GetGrads() (*mat.Dense, *mat.Dense) {
+	return nil, nil
+}

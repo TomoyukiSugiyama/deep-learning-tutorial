@@ -38,3 +38,7 @@ func (a *Affine) Backward(dout *mat.Dense) *mat.Dense {
 
 	return dx
 }
+
+func (a *Affine) GetGrads() (*mat.Dense, *mat.Dense) {
+	return a.dw, a.db
+}

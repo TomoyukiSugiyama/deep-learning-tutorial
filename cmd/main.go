@@ -14,7 +14,8 @@ import (
 )
 
 func main() {
-	Affine()
+	SoftmaxWithLoss()
+	// Affine()
 	// Sigmoid()
 	// ReLU()
 	// CalcPrice()
@@ -22,6 +23,24 @@ func main() {
 	// TestNetwork()
 	// TrainTwoLayerNetwork()
 
+}
+
+func SoftmaxWithLoss() {
+	x := []float64{1.0, 2.0, 3.0, 4.0}
+	t := []float64{0.0, 0.0, 1.0, 0.0}
+	xMat := mat.NewDense(1, 4, x)
+	tMat := mat.NewDense(1, 4, t)
+	fmt.Println("Input")
+	fmt.Println("x")
+	display.Print(xMat)
+	fmt.Println("t")
+	display.Print(tMat)
+	softmaxWithLossLayer := layers.InitSoftmaxWithLoss()
+	loss := softmaxWithLossLayer.Forward(xMat, tMat)
+	fmt.Println("Loss: ", loss)
+	dx := softmaxWithLossLayer.Backward()
+	fmt.Println("dx")
+	display.Print(dx)
 }
 
 func Affine() {

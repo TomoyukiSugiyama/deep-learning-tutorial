@@ -339,8 +339,9 @@ func TrainTwoLayerNetwork() {
 	testData := mat.DenseCopyOf(dataset.TestData)
 	testLabels := mat.DenseCopyOf(dataset.TestLabels)
 	network := network.InitTwoLayerNetwork(inputSize, hiddenSize, outputSize)
-
-	const iteration = 2000
+	trainDataT := dataT(trainData)
+	testDataT := dataT(testData)
+	const iteration = 10000
 	const batchSize = 100
 	const leaningRate = 0.1
 	iterPerEpoch := trainData.RawMatrix().Rows / batchSize
@@ -374,9 +375,9 @@ func TrainTwoLayerNetwork() {
 			j := i / iterPerEpoch
 			epochList[j] = float64(j)
 			fmt.Println(">> Epoch: ", j)
-			trainAccList[j] = network.Accuracy(trainData, trainLabels)
+			trainAccList[j] = network.Accuracy(trainDataT, trainLabels)
 			fmt.Println("Train Accuracy: ", trainAccList[j])
-			testAccList[j] = network.Accuracy(testData, testLabels)
+			testAccList[j] = network.Accuracy(testDataT, testLabels)
 			fmt.Println("Test Accuracy: ", testAccList[j])
 		}
 	}

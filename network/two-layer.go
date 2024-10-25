@@ -74,7 +74,6 @@ func InitTwoLayerNetwork(inputSize int, hiddenSize int, outputSize int) *TwoLaye
 func (n *TwoLayerNetwork) Predict(x *mat.Dense) *mat.Dense {
 	for _, layer := range n.layers.Layers {
 		x = layer.Forward(x)
-		display.Print(x)
 	}
 
 	// batchSize := x.RawMatrix().Rows

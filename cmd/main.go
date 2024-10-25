@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"math/rand"
 	"strconv"
 	"time"
@@ -19,11 +20,11 @@ func main() {
 	// SoftmaxWithLoss()
 	// Affine()
 	// Sigmoid()
-	ReLU()
+	// ReLU()
 	// CalcPrice()
 	// Training()
 	// TestNetwork()
-	// TrainTwoLayerNetwork()
+	TrainTwoLayerNetwork()
 
 }
 
@@ -43,31 +44,33 @@ func Gradient() {
 	fmt.Println("t")
 	display.Print(t)
 	// numerical gradient
-	// network.NumericalGradient(batch, t)
-	// w1NGrad, b1NGrad, w2NGrad, b2NGrad := network.GetGrads()
+	network.NumericalGradient(batch, t)
+	w1NGrad, b1NGrad, w2NGrad, b2NGrad := network.GetGrads()
 	// backpropagation
 	network.Gradient(batch, t)
-	// w1Grad, b1Grad, w2Grad, b2Grad := network.GetGrads()
+	w1Grad, b1Grad, w2Grad, b2Grad := network.GetGrads()
 
-	// diff := func(x *mat.Dense, y *mat.Dense) float64 {
-	// 	r, c := x.Caps()
-	// 	sum := 0.0
-	// 	for i := 0; i < r; i++ {
-	// 		for j := 0; j < c; j++ {
-	// 			sum += math.Abs(x.At(i, j) - y.At(i, j))
-	// 		}
-	// 	}
-	// 	return sum / float64(r*c)
-	// }
+	display.Print(b1NGrad)
+	display.Print(b1Grad)
+	diff := func(x *mat.Dense, y *mat.Dense) float64 {
+		r, c := x.Caps()
+		sum := 0.0
+		for i := 0; i < r; i++ {
+			for j := 0; j < c; j++ {
+				sum += math.Abs(x.At(i, j) - y.At(i, j))
+			}
+		}
+		return sum / float64(r*c)
+	}
 
-	// fmt.Println("w1Grad - w1NGrad")
-	// fmt.Println(diff(w1Grad, w1NGrad))
-	// fmt.Println("w2Grad - w2NGrad")
-	// fmt.Println(diff(w2Grad, w2NGrad))
-	// fmt.Println("b1Grad - b1NGrad")
-	// fmt.Println(diff(b1Grad, b1NGrad))
-	// fmt.Println("b2Grad - b2NGrad")
-	// fmt.Println(diff(b2Grad, b2NGrad))
+	fmt.Println("w1Grad - w1NGrad")
+	fmt.Println(diff(w1Grad, w1NGrad))
+	fmt.Println("w2Grad - w2NGrad")
+	fmt.Println(diff(w2Grad, w2NGrad))
+	fmt.Println("b1Grad - b1NGrad")
+	fmt.Println(diff(b1Grad, b1NGrad))
+	fmt.Println("b2Grad - b2NGrad")
+	fmt.Println(diff(b2Grad, b2NGrad))
 
 }
 
@@ -330,7 +333,6 @@ func TrainTwoLayerNetwork() {
 	const inputSize = 784
 	const hiddenSize = 50
 	const outputSize = 10
-	const batchSize = 10
 	dataset := network.GetData()
 	trainData := mat.DenseCopyOf(dataset.TrainData)
 	trainLabels := mat.DenseCopyOf(dataset.TrainLabels)
@@ -338,12 +340,20 @@ func TrainTwoLayerNetwork() {
 	testLabels := mat.DenseCopyOf(dataset.TestLabels)
 	network := network.InitTwoLayerNetwork(inputSize, hiddenSize, outputSize)
 
-	const iteration = 100
+	const iteration = 2000
+	const batchSize = 100
 	const leaningRate = 0.1
+	iterPerEpoch := trainData.RawMatrix().Rows / batchSize
+	if iterPerEpoch == 0 {
+		iterPerEpoch = 1
+	}
+	fmt.Println(">> IterationPerEpoch: ", iterPerEpoch)
+
 	trainLossList := make([]float64, iteration)
 	iterationList := make([]float64, iteration)
-	trainAccList := make([]float64, iteration)
-	testAccList := make([]float64, iteration)
+	trainAccList := make([]float64, iteration/iterPerEpoch+1)
+	testAccList := make([]float64, iteration/iterPerEpoch+1)
+	epochList := make([]float64, iteration/iterPerEpoch+1)
 	fmt.Println(">> Iteration: ", iteration)
 	fmt.Println(">> Leaning Rate: ", leaningRate)
 	fmt.Println(">> Train Total Count: ", trainData.RawMatrix().Rows)
@@ -351,18 +361,24 @@ func TrainTwoLayerNetwork() {
 
 	for i := 0; i < iteration; i++ {
 		batch, t := randomChoice(trainData, trainLabels, batchSize)
-		// display.Print(batch)
 		// network.NumericalGradient(batch, t)
 		network.Gradient(batch, t)
 		network.UpdateParams(leaningRate)
 		// check result
 		trainLossList[i] = network.Loss(batch, t)
 		iterationList[i] = float64(i)
-		fmt.Println("Loss (", strconv.Itoa(i), ") :", trainLossList[i])
-		trainAccList[i] = network.Accuracy(trainData, trainLabels)
-		fmt.Println("Train Accuracy: ", trainAccList[i])
-		testAccList[i] = network.Accuracy(testData, testLabels)
-		fmt.Println("Test Accuracy: ", testAccList[i])
+
+		if i%iterPerEpoch == 0 {
+			fmt.Println("Loss (", strconv.Itoa(i), ") :", trainLossList[i])
+			fmt.Println("Batch Accuracy: ", network.Accuracy(batch, t))
+			j := i / iterPerEpoch
+			epochList[j] = float64(j)
+			fmt.Println(">> Epoch: ", j)
+			trainAccList[j] = network.Accuracy(trainData, trainLabels)
+			fmt.Println("Train Accuracy: ", trainAccList[j])
+			testAccList[j] = network.Accuracy(testData, testLabels)
+			fmt.Println("Test Accuracy: ", testAccList[j])
+		}
 	}
 
 	loss := display.Settings{
@@ -376,18 +392,18 @@ func TrainTwoLayerNetwork() {
 
 	train := display.Settings{
 		Title:   "Train Accuracy",
-		X:       "Iteration",
+		X:       "Epochs",
 		Y:       "Accuracy",
-		Dataset: display.Dataset{X: iterationList, Y: trainAccList},
+		Dataset: display.Dataset{X: epochList, Y: trainAccList},
 		Output:  "train-accuracy.png",
 	}
 	display.New(train).Show()
 
 	test := display.Settings{
 		Title:   "Test Accuracy",
-		X:       "Iteration",
+		X:       "Epochs",
 		Y:       "Accuracy",
-		Dataset: display.Dataset{X: iterationList, Y: testAccList},
+		Dataset: display.Dataset{X: epochList, Y: testAccList},
 		Output:  "test-accuracy.png",
 	}
 	display.New(test).Show()

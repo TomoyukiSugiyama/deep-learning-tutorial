@@ -135,14 +135,14 @@ func (n *TwoLayerNetwork) NumericalGradient(x *mat.Dense, t *mat.Dense) {
 	n.b2Grad = numericalGradient(lossW, n.b2)
 }
 
-func updateParams(w *mat.Dense, grad *mat.Dense, lr float64) {
-	r, c := w.Caps()
-	for i := 0; i < r; i++ {
-		for j := 0; j < c; j++ {
-			w.Set(i, j, w.At(i, j)-lr*grad.At(i, j))
-		}
-	}
-}
+// func updateParams(w *mat.Dense, grad *mat.Dense, lr float64) {
+// 	r, c := w.Caps()
+// 	for i := 0; i < r; i++ {
+// 		for j := 0; j < c; j++ {
+// 			w.Set(i, j, w.At(i, j)-lr*grad.At(i, j))
+// 		}
+// 	}
+// }
 
 func (n *TwoLayerNetwork) UpdateParams(lr float64) {
 	// updateParams(n.w1, n.w1Grad, lr)
